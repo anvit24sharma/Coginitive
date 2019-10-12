@@ -25,6 +25,7 @@ class LatLongActvity : AppCompatActivity() {
 
         intializeView()
 
+
         search.setOnClickListener {
 
             if(!lat.text.equals("") && !longitude.text.equals("")){

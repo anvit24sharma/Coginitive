@@ -27,7 +27,7 @@ class RecyclerViewAdapter(val CityName : ArrayList<String> , val context: Contex
 
     object Statified {
         val CitynameKey: String = "CityName"
-        var BASE_URL = "https://api.openweathermap.org/com.reminder.cognitiveassignment.Activities.data/2.5/"
+        var BASE_URL = "https://api.openweathermap.org/data/2.5/"
         var Appid = "&appid=a11bb421d284ef61e5b0f02e2988ad64"
     }
 
@@ -54,7 +54,8 @@ class RecyclerViewAdapter(val CityName : ArrayList<String> , val context: Contex
         }
     }
 
-    private fun createRetrofitBuilder( cityname :String ,holder:ViewHolder)  {
+
+    private fun createRetrofitBuilder(cityname: String, holder: ViewHolder) {
 
         val httpClient = OkHttpClient.Builder()
 
@@ -68,6 +69,8 @@ class RecyclerViewAdapter(val CityName : ArrayList<String> , val context: Contex
 
         val call = postsApi.getWeatherdata(Statified.BASE_URL + "weather?q=" + cityname + Appid)
 
+        Log.i("d", Statified.BASE_URL + "weather?q=" + cityname + Appid)
+
         call.enqueue(object : Callback<Post> {
 
             override fun onFailure(call: Call<Post>?, t: Throwable?) {
@@ -76,8 +79,9 @@ class RecyclerViewAdapter(val CityName : ArrayList<String> , val context: Contex
             }
 
             override fun onResponse(call: Call<Post>?, response: Response<Post>?) {
-                 val basicweatherdata = response?.body()!!.weatherlist[0].description
-                 holder.itemView.city_weather.text = basicweatherdata
+                Log.i("d", response?.body().toString())
+                val basicweatherdata = response?.body()!!.weatherlist[0].description
+                holder.itemView.city_weather.text = basicweatherdata
             }
         })
     }
@@ -85,3 +89,6 @@ class RecyclerViewAdapter(val CityName : ArrayList<String> , val context: Contex
     class ViewHolder(view: View) :
         RecyclerView.ViewHolder(view)
 }
+
+
+

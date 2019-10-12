@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.reminder.cognitiveassignment.Activities.data.Post
 import com.reminder.cognitiveassignment.R
 import okhttp3.OkHttpClient
@@ -45,47 +47,28 @@ class WeatherDetailActivity : AppCompatActivity() {
 
         if(lat == null && long == null) {
             cityName.text = cityname
-
-
-            createRetrofitBuilderCity(cityname)
-        }
-        else{
+            createRetrofitWithViewModel(cityname)
+        } else
             createRetrofitBuilderLatLong(lat,long)
 
-        }
 
     }
 
-    private fun createRetrofitBuilderCity( cityname :String?)  {
+    private fun createRetrofitWithViewModel(cityname: String?) {
 
-        val httpClient = OkHttpClient.Builder()
+        val weatherViewModel: WeatherViewModel =
+            ViewModelProviders.of(this).get(WeatherViewModel::class.java)
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(httpClient.build())
-            .build()
-
-        val postsApi = retrofit.create(ApiCallInterface::class.java)
-
-        val call = postsApi.getWeatherdata(BASE_URL + "weather?q=" + cityname + Appid)
+        weatherViewModel.init(cityname)
 
 
-        call.enqueue(object : Callback<Post> {
-
-            override fun onFailure(call: Call<Post>?, t: Throwable?) {
-               // Toast.makeText(,"On Failure", Toast.LENGTH_SHORT).show()
-                Log.i("On failure","Reason : "+t?.fillInStackTrace())
-
-            }
-
-            override fun onResponse(call: Call<Post>?, response: Response<Post>?) {
-
-                val basicweatherdata = response?.body()!!.weatherlist[0].description
-                val Temp :String =Math.round(response.body()!!.main.temp-273.15).toString() + 0x00B0.toChar() +"C"
-                val MTemp :String =Math.round(response.body()!!.main.temp_min-273.15).toString() + 0x00B0.toChar() +"C"
-                val MxTemp :String =Math.round(response.body()!!.main.temp_max-273.15).toString() + 0x00B0.toChar() +"C"
-                val Humid :String = response.body()!!.main.humidity.toString() +"%"
+        weatherViewModel.getWeatherRepository()?.observe(this, object : Observer<Post> {
+            override fun onChanged(t: Post?) {
+                val basicweatherdata = t?.weatherlist!![0].description
+                val Temp: String = Math.round(t.main.temp - 273.15).toString() + 0x00B0.toChar() + "C"
+                val MTemp: String = Math.round(t.main.temp_min - 273.15).toString() + 0x00B0.toChar() + "C"
+                val MxTemp: String = Math.round(t.main.temp_max - 273.15).toString() + 0x00B0.toChar() + "C"
+                val Humid: String = t.main.humidity.toString() + "%"
 
                 description.text=basicweatherdata
                 currTemp.text = Temp
@@ -93,6 +76,7 @@ class WeatherDetailActivity : AppCompatActivity() {
                 maxTemp.text = MxTemp
                 humdity.text = Humid
             }
+
 
         })
 
